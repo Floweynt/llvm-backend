@@ -15,9 +15,16 @@ tablegen(LLVM DioptaseGenCallingConv.inc -gen-callingconv)
 add_public_tablegen_target(DioptaseCommonTableGen)
 
 add_llvm_target(DioptaseCodeGen
+  DioptaseISelLowering.cpp
+  DioptaseSelectionDAGInfo.cpp
+  DioptaseISelDAGToDAG.cpp
+  DioptaseInstrInfo.cpp
+  DioptaseRegisterInfo.cpp
   DioptaseSubtarget.cpp
   DioptaseTargetMachine.cpp
-
+  DioptaseFrameLowering.cpp
+  DioptaseAsmPrinter.cpp
+  
   LINK_COMPONENTS
   Analysis
   AsmPrinter
@@ -30,11 +37,11 @@ add_llvm_target(DioptaseCodeGen
   Target
   TargetParser
   TransformUtils
-  DioptaseDesc
   DioptaseInfo
 
   ADD_TO_COMPONENT
   Dioptase
   )
 
+add_subdirectory(MCTargetDesc)
 add_subdirectory(TargetInfo)

@@ -14,9 +14,9 @@
 #ifndef LLVM_LIB_TARGET_DIOPTASE_DIOPTASETARGETMACHINE_H
 #define LLVM_LIB_TARGET_DIOPTASE_DIOPTASETARGETMACHINE_H
 
+#include "DioptaseSubtarget.h"
 #include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
 #include "llvm/Target/TargetMachine.h"
-#include "DioptaseSubtarget.h"
 
 namespace llvm {
 
@@ -25,24 +25,18 @@ class Module;
 class DioptaseTargetMachine : public CodeGenTargetMachineImpl {
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
   DioptaseSubtarget Subtarget;
-  // Hold Strings that can be free'd all together with DioptaseTargetMachine
-  //   e.g.: "GCC_except_tableXX" string.
-  std::list<std::string> StrList;
 
 public:
   DioptaseTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                  StringRef FS, const TargetOptions &Options,
-                  std::optional<Reloc::Model> RM,
-                  std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
-                  bool JIT);
+                        StringRef FS, const TargetOptions &Options,
+                        std::optional<Reloc::Model> RM,
+                        std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
+                        bool JIT);
   ~DioptaseTargetMachine() override;
 
   const DioptaseSubtarget *getSubtargetImpl() const { return &Subtarget; }
   const DioptaseSubtarget *getSubtargetImpl(const Function &) const override {
     return &Subtarget;
-  }
-  std::list<std::string> *getStrList() const {
-    return const_cast<std::list<std::string> *>(&StrList);
   }
 
   // Pass Pipeline Configuration
@@ -59,11 +53,9 @@ public:
 
   TargetTransformInfo getTargetTransformInfo(const Function &F) const override;
 
-  unsigned getSjLjDataSize() const override { return 64; }
+  unsigned getSjLjDataSize() const override { return 32; }
 };
-
 
 } // end namespace llvm
 
 #endif
-

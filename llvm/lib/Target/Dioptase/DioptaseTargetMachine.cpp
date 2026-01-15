@@ -1,4 +1,5 @@
-//===-- DioptaseTargetMachine.cpp - Define TargetMachine for Dioptase -----------------===//
+//===-- DioptaseTargetMachine.cpp - Define TargetMachine for Dioptase
+//-----------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -10,10 +11,10 @@
 //===----------------------------------------------------------------------===//
 
 #include "DioptaseTargetMachine.h"
-#include "TargetInfo/DioptaseTargetInfo.h"
 #include "Dioptase.h"
 #include "DioptaseMachineFunctionInfo.h"
 #include "DioptaseTargetTransformInfo.h"
+#include "TargetInfo/DioptaseTargetInfo.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
@@ -26,7 +27,8 @@ using namespace llvm;
 
 #define DEBUG_TYPE "ve"
 
-extern "C" LLVM_ABI LLVM_EXTERNAL_VISIBILITY void LLVMInitializeDioptaseTarget() {
+extern "C" LLVM_ABI LLVM_EXTERNAL_VISIBILITY void
+LLVMInitializeDioptaseTarget() {
   // Register the target.
   RegisterTargetMachine<DioptaseTargetMachine> X(getTheDioptaseTarget());
 
@@ -52,13 +54,12 @@ static std::unique_ptr<TargetLoweringObjectFile> createTLOF() {
   return std::make_unique<DioptaseELFTargetObjectFile>();
 }
 
-/// Create an Aurora Dioptase architecture model
 DioptaseTargetMachine::DioptaseTargetMachine(const Target &T, const Triple &TT,
-                                 StringRef CPU, StringRef FS,
-                                 const TargetOptions &Options,
-                                 std::optional<Reloc::Model> RM,
-                                 std::optional<CodeModel::Model> CM,
-                                 CodeGenOptLevel OL, bool JIT)
+                                             StringRef CPU, StringRef FS,
+                                             const TargetOptions &Options,
+                                             std::optional<Reloc::Model> RM,
+                                             std::optional<CodeModel::Model> CM,
+                                             CodeGenOptLevel OL, bool JIT)
     : CodeGenTargetMachineImpl(T, TT.computeDataLayout(), TT, CPU, FS, Options,
                                getEffectiveRelocModel(RM),
                                getEffectiveCodeModel(CM, CodeModel::Small), OL),
@@ -77,12 +78,13 @@ DioptaseTargetMachine::getTargetTransformInfo(const Function &F) const {
 MachineFunctionInfo *DioptaseTargetMachine::createMachineFunctionInfo(
     BumpPtrAllocator &Allocator, const Function &F,
     const TargetSubtargetInfo *STI) const {
-  return DioptaseMachineFunctionInfo::create<DioptaseMachineFunctionInfo>(Allocator, F,
-                                                              STI);
+  return DioptaseMachineFunctionInfo::create<DioptaseMachineFunctionInfo>(
+      Allocator, F, STI);
 }
 
-namespace {
 /// Dioptase Code Generator Pass Configuration Options.
+
+namespace {
 class DioptasePassConfig : public TargetPassConfig {
 public:
   DioptasePassConfig(DioptaseTargetMachine &TM, PassManagerBase &PM)
@@ -92,29 +94,13 @@ public:
     return getTM<DioptaseTargetMachine>();
   }
 
-  void addIRPasses() override;
-  bool addInstSelector() override;
-  void addPreEmitPass() override;
+  bool addInstSelector() override {
+    addPass(createDioptaseISelDag(getDioptaseTargetMachine(), getOptLevel()));
+    return false;
+  }
 };
 } // namespace
 
 TargetPassConfig *DioptaseTargetMachine::createPassConfig(PassManagerBase &PM) {
   return new DioptasePassConfig(*this, PM);
 }
-
-void DioptasePassConfig::addIRPasses() {
-  // Dioptase requires atomic expand pass.
-  addPass(createAtomicExpandLegacyPass());
-  TargetPassConfig::addIRPasses();
-}
-
-bool DioptasePassConfig::addInstSelector() {
-  addPass(createDioptaseISelDag(getDioptaseTargetMachine()));
-  return false;
-}
-
-void DioptasePassConfig::addPreEmitPass() {
-  // LVLGen should be called after scheduling and register allocation
-  addPass(createLVLGenPass());
-}
-

@@ -1,4 +1,5 @@
-//===-- DioptaseSubtarget.cpp - Dioptase Subtarget Information ------------------------===//
+//===-- DioptaseSubtarget.cpp - Dioptase Subtarget Information
+//------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -22,13 +23,9 @@ using namespace llvm;
 #define GET_SUBTARGETINFO_CTOR
 #include "DioptaseGenSubtargetInfo.inc"
 
-void DioptaseSubtarget::anchor() {}
-
-DioptaseSubtarget &DioptaseSubtarget::initializeSubtargetDependencies(StringRef CPU,
-                                                          StringRef FS) {
-  // Default feature settings
-  EnableVPU = false;
-
+DioptaseSubtarget &
+DioptaseSubtarget::initializeSubtargetDependencies(StringRef CPU,
+                                                   StringRef FS) {
   // Determine default and user specified characteristics
   std::string CPUName = std::string(CPU);
   if (CPUName.empty())
@@ -41,7 +38,8 @@ DioptaseSubtarget &DioptaseSubtarget::initializeSubtargetDependencies(StringRef 
 }
 
 DioptaseSubtarget::DioptaseSubtarget(const Triple &TT, const std::string &CPU,
-                         const std::string &FS, const TargetMachine &TM)
+                                     const std::string &FS,
+                                     const TargetMachine &TM)
     : DioptaseGenSubtargetInfo(TT, CPU, /*TuneCPU=*/CPU, FS), TargetTriple(TT),
       InstrInfo(initializeSubtargetDependencies(CPU, FS)), TLInfo(TM, *this),
       FrameLowering(*this) {
@@ -54,16 +52,4 @@ const SelectionDAGTargetInfo *DioptaseSubtarget::getSelectionDAGInfo() const {
   return TSInfo.get();
 }
 
-uint64_t DioptaseSubtarget::getAdjustedFrameSize(uint64_t FrameSize) const {
-  // Calculate adjusted frame size by adding the size of RSA frame,
-  // return address, and frame poitner as described in DioptaseFrameLowering.cpp.
-  const DioptaseFrameLowering *TFL = getFrameLowering();
-
-  FrameSize += getRsaSize();
-  FrameSize = alignTo(FrameSize, TFL->getStackAlign());
-
-  return FrameSize;
-}
-
 bool DioptaseSubtarget::enableMachineScheduler() const { return true; }
-
