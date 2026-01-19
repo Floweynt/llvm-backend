@@ -38,9 +38,9 @@ class DioptaseInstrBr<bits<5> cc, string asmstr, list<dag> pattern>
 }
 
 class DioptaseMemWord<bits<1> mode> : DioptaseInstr<"swa $ra, [$rb], $imm12", (outs IntRegs:$ra), (ins IntRegs:$rb, simm13Op:$imm12), []> {
-  bits<12> imm12;
-  bits<5> rb;
   bits<5> ra;
+  bits<5> rb;
+  bits<12> imm12;
 
   let Opc = 0b00011;
   let Inst{16} = mode;
