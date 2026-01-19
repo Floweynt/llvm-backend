@@ -70,16 +70,9 @@ const DioptaseRegisterInfo *RI = STI.getRegisterInfo();
 const DioptaseInstrInfo *TII = STI.getInstrInfo();
 MachineBasicBlock::iterator MBBI = MBB.begin();
 
-Register SPReg = Dioptase::R3;
-Register FPReg = Dioptase::R22;
+Register SPReg = Dioptase::R31;
+Register FPReg = Dioptase::R30;
 
-// Debug location must be unknown since the first debug location is used
-// to determine the end of the prologue.
-DebugLoc DL;
-// All calls are tail calls in GHC calling conv, and functions have no
-// prologue/epilogue.
-if (MF.getFunction().getCallingConv() == CallingConv::GHC)
-  return;
 // Determine the correct frame layout
 determineFrameLayout(MF);
 
@@ -98,12 +91,6 @@ if (FirstSPAdjustAmount)
 
 // Adjust stack.
 adjustReg(MBB, MBBI, DL, SPReg, SPReg, -StackSize, MachineInstr::FrameSetup);
-// Emit ".cfi_def_cfa_offset StackSize".
-unsigned CFIIndex =
-    MF.addFrameInst(MCCFIInstruction::cfiDefCfaOffset(nullptr, StackSize));
-BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
-    .addCFIIndex(CFIIndex)
-    .setMIFlag(MachineInstr::FrameSetup);
 
 const auto &CSI = MFI.getCalleeSavedInfo();
 
@@ -113,30 +100,11 @@ const auto &CSI = MFI.getCalleeSavedInfo();
 // to the stack, not before.
 std::advance(MBBI, CSI.size());
 
-// Iterate over list of callee-saved registers and emit .cfi_offset
-// directives.
-for (const auto &Entry : CSI) {
-  int64_t Offset = MFI.getObjectOffset(Entry.getFrameIdx());
-  unsigned CFIIndex = MF.addFrameInst(MCCFIInstruction::createOffset(
-      nullptr, RI->getDwarfRegNum(Entry.getReg(), true), Offset));
-  BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
-      .addCFIIndex(CFIIndex)
-      .setMIFlag(MachineInstr::FrameSetup);
-}
-
 // Generate new FP.
 if (hasFP(MF)) {
   adjustReg(MBB, MBBI, DL, FPReg, SPReg,
             StackSize - DioptaseFI->getVarArgsSaveSize(),
             MachineInstr::FrameSetup);
-
-  // Emit ".cfi_def_cfa $fp, DioptaseFI->getVarArgsSaveSize()"
-  unsigned CFIIndex = MF.addFrameInst(
-      MCCFIInstruction::cfiDefCfa(nullptr, RI->getDwarfRegNum(FPReg, true),
-                                  DioptaseFI->getVarArgsSaveSize()));
-  BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
-      .addCFIIndex(CFIIndex)
-      .setMIFlag(MachineInstr::FrameSetup);
 }
 
 // Emit the second SP adjustment after saving callee saved registers.
