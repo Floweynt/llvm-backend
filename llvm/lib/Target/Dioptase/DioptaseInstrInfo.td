@@ -1,4 +1,5 @@
 include "DioptaseInstrFormats.td"
+include "
 
 def ADD : DioptaseInstrALU<0b00000, "add $ra, $rb, $rc",
     (outs IntRegs:$rc), 
@@ -11,4 +12,4 @@ def RET_GLUE : SDNode<"DioptaseISD::RET_GLUE", SDTNone,
 
 def BR : DioptaseInstrBr<0b00000, "br", []>;
 
-def PSEUDO_RET : Pseudo<(outs), (ins), [(RET_GLUE)]>, PseudoInstExpansion<(BR R0, R29)>;
+def PSEUDO_RET : Pseudo<"", (outs), (ins), [(RET_GLUE)]>, PseudoInstExpansion<(BR R0, R29)>;

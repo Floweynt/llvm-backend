@@ -36,3 +36,10 @@ class DioptaseInstrBr<bits<5> cc, string asmstr, list<dag> pattern>
   let Inst{4-0} = target;
   let Inst{26-22} = cc;
 }
+
+class Pseudo<string asmstr, dag outs, dag ins, list<dag> pattern>
+     : DioptaseInstr<asmstr, outs, ins, pattern> {
+   let isPseudo = 1; 
+   let isCodeGenOnly = 1;
+   let Size = 4;
+ }

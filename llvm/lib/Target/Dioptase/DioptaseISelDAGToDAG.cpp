@@ -11,6 +11,7 @@
 
 #include "MCTargetDesc/DioptaseMCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
+#include "DioptaseSelectionDAGInfo.h"
 #include "llvm/Support/Debug.h"
 
 #define DEBUG_TYPE "dioptase-isel"
