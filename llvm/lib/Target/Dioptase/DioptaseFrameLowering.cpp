@@ -240,11 +240,10 @@ void DioptaseFrameLowering::determineCalleeSaves(MachineFunction &MF,
                                                  BitVector &SavedRegs,
                                                  RegScavenger *RS) const {
 
-  assert(false && "not implemented");
   TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
-  // Unconditionally spill RA and FP only if the function uses a frame
-  // pointer.
-  /*if (hasFP(MF)) {
+
+  /* TODO: ????
+  if (hasFP(MF)) {
     SavedRegs.set(Dioptase::R1);
     SavedRegs.set(Dioptase::R22);
   }
