@@ -261,5 +261,5 @@ DioptaseTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   if (Glue.getNode())
     RetOps.push_back(Glue);
 
-  return DAG.getNode(DioptaseISD::RET, DL, MVT::Other, RetOps);
+  return DAG.getNode(DioptaseISD::RET_GLUE, DL, MVT::Other, RetOps);
 }

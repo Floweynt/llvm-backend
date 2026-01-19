@@ -27,4 +27,12 @@ class DioptaseInstrALU<bits<5> aluOpc, string asmstr, dag outs, dag ins, list<da
   let Inst{26-22} = ra;
 }
 
-
+class DioptaseInstrBr<bits<5> cc, string asmstr, list<dag> pattern> 
+    : DioptaseInstr<asmstr # " $out, $target", (outs IntRegs:$out), (ins IntRegs:$target), pattern> {
+  bits<5> out;
+  bits<5> target;
+  let Opc = 0b01101;
+  let Inst{9-5} = out;
+  let Inst{4-0} = target;
+  let Inst{26-22} = cc;
+}
