@@ -37,6 +37,18 @@ class DioptaseInstrBr<bits<5> cc, string asmstr, list<dag> pattern>
   let Inst{26-22} = cc;
 }
 
+class DioptaseMemWord<bits<1> mode> : DioptaseInstr<"swa $ra, [$rb], $imm12", (outs IntRegs:$ra), (ins IntRegs:$rb, simm13Op:$imm12), []> {
+  bits<12> imm12;
+  bits<5> rb;
+  bits<5> ra;
+
+  let Opc = 0b00011;
+  let Inst{16} = mode;
+  let Inst{11-0} = imm12;
+  let Inst{26-22} = ra;
+  let Inst{21-17} = rb;
+}
+
 class Pseudo<string asmstr, dag outs, dag ins, list<dag> pattern>
      : DioptaseInstr<asmstr, outs, ins, pattern> {
    let isPseudo = 1; 
