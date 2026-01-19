@@ -9,6 +9,6 @@ def ADD : DioptaseInstrALU<0b00000, "add $ra, $rb, $rc",
 def RET_GLUE : SDNode<"DioptaseISD::RET_GLUE", SDTNone,
                  [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
-let isReturn = 1, isTerminator = 1, isBarrier = 1 in {
-  def RET : DioptaseInstrBr<0b00000, "ret", []>;
-}
+def BR : DioptaseInstrBr<0b00000, "br", []>;
+
+def PSEUDO_RET : Pseudo<(outs), (ins), [(RET_GLUE)]>, PseudoInstExpansion<(BR R0, R29)>;
